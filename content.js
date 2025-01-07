@@ -2,14 +2,14 @@ let hidden = true; // 初期状態は隠す
 
 // 「答え」を非表示にする関数
 function hideAnswer() {
-  document.querySelectorAll('.rightanswer, .specificfeedback, .fa-check.text-success,.fa-remove.text-danger,.state, .trafficlight').forEach(function(element) {
+  document.querySelectorAll('.rightanswer, .specificfeedback, .fa-check.text-success, .state, .trafficlight').forEach(function(element) {
     element.style.display = 'none';
   });
 }
 
 // 「答え」を表示する関数
 function showAnswer() {
-  document.querySelectorAll('.rightanswer, .specificfeedback, .fa-check.text-success,.fa-remove.text-danger,.state, .trafficlight').forEach(function(element) {
+  document.querySelectorAll('.rightanswer, .specificfeedback, .fa-check.text-success, .state, .trafficlight').forEach(function(element) {
     element.style.display = 'block';
   });
 }
