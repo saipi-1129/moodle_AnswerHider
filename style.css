@@ -1,0 +1,25 @@
+.hidden {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  
+  .visible {
+    display: block;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+  }
+  
+  #toggleButton {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  #toggleButton:hover {
+    background-color: #0056b3;
+  }
+  
