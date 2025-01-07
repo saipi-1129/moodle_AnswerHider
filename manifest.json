@@ -1,20 +1,27 @@
 {
     "manifest_version": 3,
-    "name": "Answer Hider",
+    "name": "Moodle Answer Hider",
     "version": "1.0",
-    "description": "拡張機能",
+    "description": "レビューの答えを非表示にするmoodle用学習支援chrome拡張機能👍",
     "permissions": ["activeTab"],
     "background": {
       "service_worker": "background.js"
     },
     "content_scripts": [
       {
-        "matches": ["<all_urls>"],
+        "matches": [
+            "https://moodle2024.mc2.osakac.ac.jp/2024/mod/quiz/review.php*"
+          ],
         "js": ["content.js"]
       }
     ],
     "action": {
       "default_popup": "popup.html"
-    }
+    },
+    "icons": {
+        "16": "icon/icon16.png",
+        "48": "icon/icon48.png",
+        "128": "icon/icon128.png"
+      }
   }
   
