@@ -3,7 +3,7 @@
     "name": "Moodle Answer Hider",
     "version": "1.0",
     "description": "レビューの答えを非表示にするmoodle用学習支援chrome拡張機能👍",
-    "permissions": ["activeTab"],
+    "permissions": ["activeTab", "scripting"],
     "background": {
       "service_worker": "background.js"
     },

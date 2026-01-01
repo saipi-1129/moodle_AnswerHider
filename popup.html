@@ -19,6 +19,20 @@
 <body>
   <button id="toggleBtn">答えを表示/非表示</button>
   
+  <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+    <label style="cursor: pointer;">
+      <input type="radio" name="mode" value="normal" id="modeNormal"> 通常モード
+    </label>
+    <label style="cursor: pointer;">
+      <input type="radio" name="mode" value="test" id="modeTest"> テストモード
+    </label>
+  </div>
+
+  <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ccc; font-size: 12px; color: #666;">
+    <strong>ショートカット:</strong><br>
+    [H] キー：全体の表示/非表示切替
+  </div>
+  
   <script src="popup.js"></script>
 </body>
 </html>
