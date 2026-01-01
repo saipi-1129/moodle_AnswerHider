@@ -10,7 +10,7 @@
     "content_scripts": [
       {
         "matches": [
-            "*://*/mod/quiz/review.php*"
+            "*://*/*mod/quiz/review.php*"
           ],
         "js": ["content.js"]
       }
