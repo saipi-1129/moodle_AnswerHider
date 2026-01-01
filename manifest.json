@@ -10,7 +10,7 @@
     "content_scripts": [
       {
         "matches": [
-            "https://moodle2024.mc2.osakac.ac.jp/2024/mod/quiz/review.php*"
+            "https://moodle2025.mc2.osakac.ac.jp/2025/mod/quiz/review.php*"
           ],
         "js": ["content.js"]
       }
