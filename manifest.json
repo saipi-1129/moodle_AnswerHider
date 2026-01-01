@@ -3,14 +3,14 @@
     "name": "Moodle Answer Hider",
     "version": "1.0",
     "description": "レビューの答えを非表示にするmoodle用学習支援chrome拡張機能👍",
-    "permissions": ["activeTab", "scripting"],
+    "permissions": ["activeTab", "scripting", "storage"],
     "background": {
       "service_worker": "background.js"
     },
     "content_scripts": [
       {
         "matches": [
-            "https://moodle2025.mc2.osakac.ac.jp/2025/mod/quiz/review.php*"
+            "*://*/mod/quiz/review.php*"
           ],
         "js": ["content.js"]
       }

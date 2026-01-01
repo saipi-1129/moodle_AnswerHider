@@ -10,6 +10,26 @@ function setQuestionVisibility(questionElement, show) {
     el.style.display = show ? 'block' : 'none';
   });
   
+  // テキスト入力の表示制御
+  const textInputs = questionElement.querySelectorAll('input.hider-input');
+  textInputs.forEach(input => {
+      if (show) {
+          input.value = input.dataset.originalAnswer;
+      } else {
+          input.value = "";
+      }
+  });
+
+  // セレクトボックスの表示制御
+  const selects = questionElement.querySelectorAll('select.hider-select');
+  selects.forEach(select => {
+      if (show) {
+          select.value = select.dataset.originalAnswer;
+      } else {
+          select.value = "";
+      }
+  });
+
   // ラジオボタンをリセット（仕様通り）
   const radios = questionElement.querySelectorAll('input[type="radio"]');
   radios.forEach(r => r.checked = false);
@@ -20,7 +40,6 @@ function toggleQuestion(questionElement) {
   const answers = questionElement.querySelectorAll(answerSelectors);
   if (answers.length === 0) return;
 
-  // 最初の要素の状態を見て判定（一つでも非表示なら表示に切り替え）
   const isHidden = answers[0].style.display === 'none';
   setQuestionVisibility(questionElement, !isHidden);
 }
@@ -46,7 +65,7 @@ function setTestMode(enabled) {
         } else {
             radio.disabled = true;
             radio.setAttribute('disabled', 'disabled');
-            radio.checked = false; // モード終了時にリセット
+            radio.checked = false;
         }
     });
 
@@ -55,57 +74,45 @@ function setTestMode(enabled) {
     textInputs.forEach(input => {
         if (enabled) {
             input.removeAttribute('readonly');
-            input.value = ""; // テスト入力用にクリア
+            input.value = "";
         } else {
             input.setAttribute('readonly', 'readonly');
-            input.value = input.dataset.originalAnswer; // 答えを戻す
+            input.value = input.dataset.originalAnswer;
         }
         // フィードバック削除
-        const container = input.closest('span') || input.parentElement; // Moodleの構造によるが親へ
+        const container = input.closest('span') || input.parentElement;
         if (container) {
              container.querySelectorAll('.hider-feedback').forEach(el => el.remove());
         }
     });
 
-    // モードOFFなら（ラジオボタン側の）フィードバックも削除
+    // --- セレクトボックス（プルダウン）の処理 ---
+    const selects = document.querySelectorAll('.que select.hider-select');
+    selects.forEach(select => {
+        if (enabled) {
+            select.disabled = false;
+            select.removeAttribute('disabled');
+            select.value = "";
+        } else {
+            select.disabled = true;
+            select.setAttribute('disabled', 'disabled');
+            select.value = select.dataset.originalAnswer;
+        }
+        // フィードバック削除
+        let parent = select.parentElement;
+        parent.querySelectorAll('.hider-feedback').forEach(el => el.remove());
+    });
+
     if (!enabled) {
         document.querySelectorAll('.hider-feedback').forEach(el => el.remove());
     }
 }
-
-// 質問ごとの表示設定を行う関数
-function setQuestionVisibility(questionElement, show) {
-  const answers = questionElement.querySelectorAll(answerSelectors);
-  answers.forEach(el => {
-    el.style.display = show ? 'block' : 'none';
-  });
-  
-  // テキスト入力の表示制御
-  const textInputs = questionElement.querySelectorAll('input.hider-input');
-  textInputs.forEach(input => {
-      if (show) {
-          input.value = input.dataset.originalAnswer;
-      } else {
-          // テストモード中は、ユーザーが入力を試みている可能性があるので
-          // 強制的にクリアするかどうかは議論の余地があるが、
-          // "Hide" = "隠す" なのでクリアする（テスト入力中の文字も隠れる）
-          input.value = "";
-      }
-  });
-
-  // ラジオボタンをリセット（仕様通り）
-  const radios = questionElement.querySelectorAll('input[type="radio"]');
-  radios.forEach(r => r.checked = false);
-}
-
-// ... (toggleQuestion, toggleAll は変更なし) ...
 
 // 初期化処理
 function init() {
   const questions = document.querySelectorAll('.que');
   
   if (questions.length === 0) {
-    // ... (フォールバック処理は省略/変更なし) ...
     document.querySelectorAll(answerSelectors).forEach(el => el.style.display = 'none');
     document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
     return;
@@ -113,80 +120,99 @@ function init() {
 
   questions.forEach(q => {
     // --- テキスト入力（記述式）の初期化 ---
-    // Moodleの記述式回答欄（正解表示状態）を取得
     const textInputs = q.querySelectorAll('input[type="text"][readonly]');
     textInputs.forEach(input => {
         if (!input.dataset.originalAnswer) {
-            input.dataset.originalAnswer = input.value; // 正解を保存
-            input.classList.add('hider-input'); // 識別用クラス
+            input.dataset.originalAnswer = input.value;
+            input.classList.add('hider-input');
         }
         
-        // 入力に対する正誤判定イベント
         input.addEventListener('change', function() {
             if (!isTestMode) return;
             
             const val = input.value.trim();
             const correctVal = input.dataset.originalAnswer.trim();
             
-            // フィードバック表示場所（inputの直後）
-            // 既存フィードバック削除
             let parent = input.parentElement;
             parent.querySelectorAll('.hider-feedback').forEach(el => el.remove());
 
             const msg = document.createElement('span');
             msg.className = 'hider-feedback';
-            msg.style.fontWeight = 'bold';
             msg.style.marginLeft = '0.5em';
 
             if (val === correctVal) {
                 msg.textContent = '⭕ 正解';
-                msg.style.color = '#28a745';
             } else {
                 msg.textContent = '❌ 不正解';
-                msg.style.color = '#dc3545';
             }
             
             input.after(msg);
         });
     });
 
-    // 初期状態は隠す（テキスト入力もここでクリアされる）
+    // --- セレクトボックス（プルダウン）の初期化 ---
+    const selects = q.querySelectorAll('select[disabled]');
+    selects.forEach(select => {
+        if (!select.dataset.originalAnswer) {
+            select.dataset.originalAnswer = select.value;
+            select.classList.add('hider-select');
+        }
+
+        select.addEventListener('change', function() {
+            if (!isTestMode) return;
+
+            const val = select.value;
+            const correctVal = select.dataset.originalAnswer;
+
+            let parent = select.parentElement;
+            parent.querySelectorAll('.hider-feedback').forEach(el => el.remove());
+
+            const msg = document.createElement('span');
+            msg.className = 'hider-feedback';
+            msg.style.marginLeft = '0.5em';
+
+            if (val === correctVal) {
+                msg.textContent = '⭕ 正解';
+            } else {
+                msg.textContent = '❌ 不正解';
+            }
+
+            select.after(msg);
+        });
+    });
+
     setQuestionVisibility(q, false);
 
-    // クリックイベント設定 (質問全体のトグル)
     q.addEventListener('click', (e) => {
-      // ... (既存のクリック処理) ...
       if (window.getSelection().toString().length > 0) return;
-      const ignoreTags = ['A', 'INPUT', 'TEXTAREA', 'BUTTON', 'LABEL'];
-      if (ignoreTags.includes(e.target.tagName) || e.target.closest('label') || e.target.closest('a') || e.target.closest('button')) {
+      const ignoreTags = ['A', 'INPUT', 'TEXTAREA', 'BUTTON', 'LABEL', 'SELECT', 'OPTION'];
+      if (ignoreTags.includes(e.target.tagName) || e.target.closest('label') || e.target.closest('a') || e.target.closest('button') || e.target.closest('select')) {
           return;
       }
       toggleQuestion(q);
     });
 
-    // ... (ラジオボタンのイベントリスナー設定 - 既存のまま) ...
     const radios = q.querySelectorAll('input[type="radio"]');
     radios.forEach(radio => {
         radio.addEventListener('click', (e) => {
              if (!isTestMode) return;
-             // ... (中略) ...
              const container = radio.closest('div.r0, div.r1') || radio.parentElement;
              container.querySelectorAll('.hider-feedback').forEach(el => el.remove());
+             
              const isCorrect = container.classList.contains('correct') || 
                                container.querySelector('.fa-check.text-success') !== null ||
                                container.querySelector('.icon.fa-check') !== null;
              
              const msg = document.createElement('span');
              msg.className = 'hider-feedback';
-             msg.style.fontWeight = 'bold';
              msg.style.marginLeft = '0.5em';
+             
              if (isCorrect) {
                  msg.textContent = '⭕ 正解';
-                 msg.style.color = '#28a745';
              } else {
                  msg.textContent = '❌ 不正解';
-                 msg.style.color = '#dc3545';
              }
+             
              if (radio.nextElementSibling) {
                  radio.nextElementSibling.after(msg);
              } else {
@@ -196,14 +222,17 @@ function init() {
     });
   });
 
-  // 初期状態: テストモードOFF
-  setTestMode(false);
+  chrome.storage.local.get(['mode'], function(result) {
+      if (result.mode === 'test') {
+          setTestMode(true);
+      } else {
+          setTestMode(false);
+      }
+  });
 }
 
-// 実行
 init();
 
-// キーボードイベントをリスン（'h'キーで全体トグル）
 document.addEventListener('keydown', function(event) {
     if (['INPUT', 'TEXTAREA'].includes(event.target.tagName) || event.target.isContentEditable) {
         return;
@@ -213,7 +242,6 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-// メッセージリスナー
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "toggle_answer") {
     toggleAll();
